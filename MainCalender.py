@@ -3,7 +3,7 @@ import tkinter.font
 from tkinter import ttk
 import Global_var
 import calendar
-
+from datetime import datetime,timedelta
 
 def Calender():
     def From_function():
@@ -224,14 +224,9 @@ def Calender():
 
             def print_date():
                 From_Date = ttkcal.selection
-                From_Date = str("Selected Date" + str(From_Date) + " End")
-                # Selected Date 2019-09-17 00:00:00 End
-                From_Date = From_Date.partition("Date")[2].partition("00:")[0].strip()
-                # 2019-07-24 # Tender Actual Date Format
-                Year = From_Date[0:4]
-                Month = From_Date[5:7]
-                Day = From_Date[8:10]
-                Global_var.From_Date = "" + Year + '-'"" + Month + '-'"" + Day
+                datetime_object = datetime.strptime(str(From_Date), '%Y-%m-%d %H:%M:%S')
+                From_Date = datetime_object.strftime("%Y-%m-%d")
+                Global_var.From_Date = From_Date
                 print(Global_var.From_Date)
 
             def quit1():

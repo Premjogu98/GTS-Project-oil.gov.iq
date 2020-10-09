@@ -11,76 +11,45 @@ import requests
 import urllib.request
 import urllib.parse
 import re
-
-
+import html
+import wx
+app = wx.App()
 def ChromeDriver():
-    File_Location = open("D:\\0 PYTHON EXE SQL CONNECTION & DRIVER PATH\\oil.gov.iq\\Location For Database & Driver.txt", "r")
-    TXT_File_AllText = File_Location.read()
-    Chromedriver = str(TXT_File_AllText).partition("Driver=")[2].partition("\")")[0].strip()
-    # chrome_options = Options()
-    # chrome_options.add_extension('D:\\0 PYTHON EXE SQL CONNECTION & DRIVER PATH\\oil.gov.iq\\Browsec-VPN.crx')  # ADD EXTENSION Browsec-VPN
-    # browser = webdriver.Chrome(executable_path=str(Chromedriver),
-    #                            chrome_options=chrome_options)
-    browser = webdriver.Chrome(executable_path=str(Chromedriver))
-    browser.get(
-        """https://chrome.google.com/webstore/detail/browsec-vpn-free-and-unli/omghfjlpggmjjaagoclmmobgdodcjboh?hl=en" ping="/url?sa=t&amp;source=web&amp;rct=j&amp;url=https://chrome.google.com/webstore/detail/browsec-vpn-free-and-unli/omghfjlpggmjjaagoclmmobgdodcjboh%3Fhl%3Den&amp;ved=2ahUKEwivq8rjlcHmAhVtxzgGHZ-JBMgQFjAAegQIAhAB""")
+
+    browser = webdriver.Chrome(executable_path=str(f"F:\\chromedriver.exe"))
+    browser.maximize_window()
+    browser.get("""https://chrome.google.com/webstore/detail/browsec-vpn-free-and-unli/omghfjlpggmjjaagoclmmobgdodcjboh?hl=en" ping="/url?sa=t&amp;source=web&amp;rct=j&amp;url=https://chrome.google.com/webstore/detail/browsec-vpn-free-and-unli/omghfjlpggmjjaagoclmmobgdodcjboh%3Fhl%3Den&amp;ved=2ahUKEwivq8rjlcHmAhVtxzgGHZ-JBMgQFjAAegQIAhAB""")
     for Add_Extension in browser.find_elements_by_xpath('/html/body/div[4]/div[2]/div/div/div[2]/div[2]/div'):
         Add_Extension.click()
         break
-    import wx
-    app = wx.App()
     wx.MessageBox(' -_-  Add Extension and Select Proxy Between 25 SEC -_- ', 'Info', wx.OK | wx.ICON_WARNING)
     time.sleep(25)  # WAIT UNTIL CHANGE THE MANUAL VPN SETTING
     browser.get("https://oil.gov.iq/index.php")
-    browser.set_window_size(1024, 600)
-    browser.maximize_window()
-    time.sleep(1)
-    # time.sleep(20) # WAIT UNTIL CHANGE THE MANUAL VPN SETTING
-    # browser.get('https://oil.gov.iq/index.php')
-    # browser.set_window_size(1024 , 600)
-    # browser.maximize_window()
-    # browser.switch_to.window(browser.window_handles[1])
-    # browser.close()
-    # browser.switch_to.window(browser.window_handles[0])
-
-
-    for Change_lang in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[2]/td/table/tbody/tr/td[7]/div/ul/li/a/font/center/b'):
-        Change_lang.click()
-        break
-    for Bid_Tenders in browser.find_elements_by_xpath('/html/body/div/center/table/tbody/tr[7]/td/table/tbody/tr/td[3]/table[5]/tbody/tr[2]/td/p[1]/a/span/span'):
-        Bid_Tenders.click()
-        break
-    for Search_button in browser.find_elements_by_xpath('/html/body/div[1]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/table[2]/tbody/tr/td/table/tbody/tr/td/center/input'):
+    wx.MessageBox(' -_-  Fill captch First -_- ', 'Info', wx.OK | wx.ICON_INFORMATION)
+    time.sleep(2)
+    browser.get("https://oil.gov.iq/index.php?name=monaksa")
+    time.sleep(2)
+    for Search_button in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/table[3]/tbody/tr/td/table/tbody/tr/td/center[1]/input'):
         Search_button.click()
         break
-    a = True
-    while a == True:
-        try:
-            Tender_href = []
-            for Search_icon in range(2, 60, 1):
-                xpath_date = "/html/body/div[1]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/table[2]/tbody/tr/td/table/tbody/tr/td/table[2]/tbody/tr[" + str(Search_icon) + "]/td[5]/center"
-                for publish_date in browser.find_elements_by_xpath(str(xpath_date)):
-                    pubdate = publish_date.get_attribute("innerText").strip()
-                    a = False
-                    if pubdate == "":
-                        Scrap_data(browser, Tender_href)
-                        print("Tender Date Dead")
-                        a = False
-                    else:
-                        datetime_object = datetime.strptime(pubdate, '%Y-%m-%d')
-                        publish_date1 = datetime_object.strftime("%Y-%m-%d")
-                        if publish_date1 >= Global_var.From_Date:
-                            for search_icon_href in browser.find_elements_by_xpath("/html/body/div[1]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/table[2]/tbody/tr/td/table/tbody/tr/td/table[2]/tbody/tr[" + str(Search_icon) + "]/td[8]/div/a"):
-                                Tender_href.append(search_icon_href.get_attribute('href'))
-                        else:
-                            print("Tender Date Dead")
-                            Scrap_data(browser, Tender_href)
-                            a = False
-
-            Scrap_data(browser, Tender_href)
-        except Exception as e:
-            print(e)
-            a = True
+    td = 2
+    tender_href_list = []
+    for release_date in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/table[3]/tbody/tr/td/table/tbody/tr/td/table[2]/tbody/tr/td[5]/center'):
+        release_date = release_date.get_attribute('innerText').strip()
+        datetime_object = datetime.strptime(release_date, '%Y-%m-%d')
+        publish_date = datetime_object.strftime("%Y-%m-%d")
+        datetime_object_pub = datetime.strptime(publish_date, '%Y-%m-%d')
+        User_Selected_date = datetime.strptime(str(Global_var.From_Date), '%Y-%m-%d')
+        timedelta_obj = datetime_object_pub - User_Selected_date
+        day = timedelta_obj.days
+        if day >= 0:
+            for tender_href in browser.find_elements_by_xpath(f'/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/table[3]/tbody/tr/td/table/tbody/tr/td/table[2]/tbody/tr[{str(td)}]/td[8]/div/a'):
+                tender_href = tender_href.get_attribute('href').strip()
+                tender_href_list.append(tender_href)
+                td += 1
+                break
+        else:
+            Scrap_data(browser, tender_href_list)
 
 
 def Scrap_data(browser, Tender_href):
@@ -90,176 +59,183 @@ def Scrap_data(browser, Tender_href):
         try:
             for href in Tender_href:
                 browser.get(href)
-                Global_var.Total += 1
+                time.sleep(2)
                 SegFeild = []
-                for data in range(42):
+                for data in range(45):
                     SegFeild.append('')
 
                 get_htmlSource = ""
-                for outerHTML in browser.find_elements_by_xpath('/html/body/div/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table'):
+                for outerHTML in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table'):
                     get_htmlSource = outerHTML.get_attribute('outerHTML')
-                    get_htmlSource = get_htmlSource.replace('href="upload/', 'href="http://www.mot.gov.iq/upload/')
+                    get_htmlSource = get_htmlSource.replace('href="upload/', 'href="https://oil.gov.iq/upload/')
                     break
-
                 # Purchaser
-                for Name_of_Directorate in browser.find_elements_by_xpath('/html/body/div/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[2]/td[2]'):
-                    Name_of_Directorate = Name_of_Directorate.get_attribute('innerText').replace('&nbsp;', '').strip().upper()
-                    if Name_of_Directorate == "BAIJI OIL REFINERY":
+                for Name_of_Directorate in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[2]/td[2]'):
+                    Name_of_Directorate = Name_of_Directorate.get_attribute('innerText').replace('&nbsp;', '').strip()
+                    if '(OCC)' in Name_of_Directorate:
+                        SegFeild[2] = "Baghdad, Iraq<br>\nTel: +964 781 275 0356"
+                        SegFeild[12] = Name_of_Directorate.strip()
+                    elif '(TOC)' in Name_of_Directorate:
+                        SegFeild[2] = "Dhi Qar - Al-Chibayish Road, Iraq<br>\nPhone: 09123276922 / 07831073600"
+                        SegFeild[1] = 'info@toc.oil.gov.iq'
+                        SegFeild[12] = Name_of_Directorate.strip()
+                    elif '(MOO)' in Name_of_Directorate:
+                        SegFeild[2] = "74 A Persian Gulf St, Kuwait City, Kuwait<br>\nTel: +965 1 858858"
+                        SegFeild[8] = 'http://www.moo.gov.kw/'
+                        SegFeild[1] = 'alnaft@moo.gov.kw'
+                        SegFeild[12] = Name_of_Directorate.strip()
+                    
+                    elif '(KOTI)' in Name_of_Directorate:
+                        SegFeild[2] = "Kirkuk 36001, Iraq<br>\nTel: +964 770 123 2541"
+                        SegFeild[8] = 'http://www.koi.com/'
+                        SegFeild[1] = 'zak@koi.com'
+                        SegFeild[12] = Name_of_Directorate.strip()
+                    elif '(NRC)' in Name_of_Directorate:
                         SegFeild[2] = "Baiji, Iraq<br>\n Phone: +974 7725 7608"
                         SegFeild[8] = 'http://www.nrc.oil.gov.iq/'
                         SegFeild[12] = Name_of_Directorate.strip()
-
-                    elif Name_of_Directorate == "HEAVY ENGINEERING EQUIPMENT STATE COMPANY(HEESCO)":
+                    elif '(HEESCO)' in Name_of_Directorate:
+                        SegFeild[2] = "Baghdad-Daura Refinery Complex<br>\nTel: (+964) 07827836150 ,Fax: 770073"
+                        SegFeild[8] = 'http://www.heesco.oil.gov.iq/en/enindex.html'
+                        SegFeild[12] = Name_of_Directorate.strip()
+                    elif '(BAIOTI)' in Name_of_Directorate:
                         SegFeild[2] = "Baghdad-Daura Refinery Complex<br>\nTel: (+964) 07827836150 ,Fax: 770073"
                         SegFeild[8] = 'http://www.heesco.oil.gov.iq/en/enindex.html'
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "KARKUK OIL TRAINING INSTITUTE(KOTI)":
-                        SegFeild[2] = "Kirkuk 36001, Iraq<br>\nPhone: +964 770 123 2541"
-                        SegFeild[8] = "http://www.koi.com/"
-                        SegFeild[12] = Name_of_Directorate.strip()
-
-                    elif Name_of_Directorate == "BAIJI OIL TRAINING INSTITUTE(BAIOTI)":
-                        SegFeild[2] = ""
-                        SegFeild[8] = "http://www.otibaiji.oil.gov.iq/"
-                        SegFeild[12] = Name_of_Directorate.strip()
-
-                    elif Name_of_Directorate == "OIL MARKETING COMPANY (SOMO)":
+                    elif '(SOMO)' in Name_of_Directorate:
                         SegFeild[2] = "Baghdad, Iraq<br>\nPhone: "
                         SegFeild[8] = "https://somooil.gov.iq/en/index.php"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "OIL EXPLORATION COMPANY (OEC)":
+                    elif '(OEC)' in Name_of_Directorate:
                         SegFeild[2] = "Port Said Street,baghdad,Iraq<br>\nPhone: +9647832593219 "
                         SegFeild[8] = "http://oec.oil.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "BASRA OIL TRAINING INSTITUTE (BAS-OTI)":
+                    elif '(BAS-OTI)' in Name_of_Directorate:
                         SegFeild[2] = "Basrah, Iraq<br>\nPhone: +964 780 911 4735"
                         SegFeild[8] = "http://bsroti.oil.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "ARAB WELL LOGGING COMPANY )AWLCO)":
-                        SegFeild[2] = "Building :39,street : 15,District: 309,Baghdad,Iraq<br>\nPhone: +964-780- 911 6291,Fax: +964 8825643"
+                    elif '(AWLCO)' in Name_of_Directorate:
+                        SegFeild[2] = "Building :39,street : 15,District: 309,Baghdad,Iraq<br>\nPhone: +964-780- 911 6291, Fax: +964 8825643"
                         SegFeild[8] = "http://www.awlco.net/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "IRAQI OIL TANKERS COMPANY (IOTC)":
+                    elif '(IOTC)' in Name_of_Directorate:
                         SegFeild[2] = "Basrah, Iraq<br>\nPhone:"
                         SegFeild[8] = "http://iotc.oil.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "BASRAH OIL COMPANY (BOC)":
+                    elif '(BOC)' in Name_of_Directorate:
                         SegFeild[2] = "Hey Al Kafaat, Basrah, Iraq<br>\nPhone:"
                         SegFeild[8] = "http://boc.oil.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "MISSAN OIL COMPANY (MOC)":
+                    elif '(MOC)' in Name_of_Directorate:
                         SegFeild[2] = "Amarah, Iraq<br>\nPhone:"
                         SegFeild[8] = "http://moc.oil.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "SOUTH REFINERIES COMPANY()":
+                    elif 'شركة مصافي الجنوب ()' in Name_of_Directorate:
                         SegFeild[2] = "Iraq-basrah<br>\nPhone:0096440614713"
                         SegFeild[8] = "http://www.src.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "NORTH OIL COMPANY(NOC)":
+                    elif '(NOC)' in Name_of_Directorate:
                         SegFeild[2] = "Phone: 07481492275, Fax: 0096450255399"
                         SegFeild[8] = ""
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "NORTH GAS COMPANY (NGC)":
+                    elif '(NGC)' in Name_of_Directorate:
                         SegFeild[2] = "Kirkuk, Iraq<br>\nPhone: 07481492275,Fax: 0096450255399"
                         SegFeild[8] = "http://ngc.oil.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "Baghdad Oil Training Institute (BOTI)":
+                    elif '(BOTI)' in Name_of_Directorate:
                         SegFeild[2] = "Baghdad, Iraq<br>\n Phone: 00964-1 4250363,Fax: 00964-1 4257235"
                         SegFeild[8] = "http://www.boti.oil.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "IRAQI DRILLING COMPANY(IDC)":
+                    elif '(IDC)' in Name_of_Directorate:
                         SegFeild[2] = "Baghdad/al-nidhal,park Al-saadoun,kirkuk, Iraq<br>\n Phone: 719173 - 7198278,Fax: 7178285"
                         SegFeild[8] = "http://www.idc.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "PETROLEUM RESEARCH & DEVELOPMENT CENTER (PRDC)":
+                    elif '(PRDC)' in Name_of_Directorate:
                         SegFeild[2] = "Baghdad - Bub Al Sham/ near Al-Sumood Station, Iraq<br>\n Phone: 0740 0233 637"
                         SegFeild[8] = "http://prdc.oil.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "MIDLAND OIL COMPANY(MDOC)":
-                        SegFeild[2] = "Phone: +20 1001797986"
+                    elif '(MDOC)' in Name_of_Directorate:
+                        SegFeild[2] = "Iraq<br>\nPhone: +20 1001797986"
                         SegFeild[8] = "https://imog-summit.com/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "MIDLAND REFINERIES COMPANY (MRC)":
+                    elif '(MRC)' in Name_of_Directorate:
                         SegFeild[2] = "Baghdad, Iraq<br>\nPhone: +964 1 775 0300"
                         SegFeild[8] = "https://mrc.oil.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
-                    elif Name_of_Directorate == "GAS FILLING COMPANY(GFC)":
+                    elif '(GFC)' in Name_of_Directorate:
                         SegFeild[2] = "Taji, Iraq<br>\nPhone:"
                         SegFeild[8] = ""
                         SegFeild[12] = Name_of_Directorate.strip()
                     else:
                         SegFeild[12] = Name_of_Directorate.strip()
-
                     break
 
                 # Title
-                for Tender_Subject in browser.find_elements_by_xpath('/html/body/div/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[3]/td[2]'):
+                for Tender_Subject in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[3]/td[2]'):
                     Tender_Subject = Tender_Subject.get_attribute('innerText').replace('&nbsp;', '').strip()
-                    Tender_Subject = Tender_Subject.lstrip('(').rstrip(')').lstrip('-').rstrip('-').lstrip('\"').rstrip('\"')
                     Tender_Subject = string.capwords(str(Tender_Subject)).strip()
                     SegFeild[19] = Tender_Subject
                     break
 
                 # Email
-                for Email in browser.find_elements_by_xpath('/html/body/div/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[4]/td[2]/div'):
-                    Email = Email.get_attribute('innerText').replace('&nbsp;', '').strip().replace(' ','')
+                for Email in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[4]/td[2]/div'):
+                    Email = Email.get_attribute('innerText').replace('&nbsp;', '').replace('&nbsp;', '').strip().replace(' ','')
                     SegFeild[1] = Email.strip()
                     break
 
                 # tender NO
-                for Bid_number in browser.find_elements_by_xpath('/html/body/div/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[5]/td[2]'):
+                for Bid_number in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[5]/td[2]'):
                     Bid_number = Bid_number.get_attribute('innerText').replace('&nbsp;', '').strip()
                     SegFeild[13] = Bid_number.strip()
                     break
 
                 # Release Date
                 Release_Date = ""
-                for Release_Date in browser.find_elements_by_xpath('/html/body/div/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[6]/td[2]'):
+                for Release_Date in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[6]/td[2]'):
                     Release_Date = Release_Date.get_attribute('innerText').replace('&nbsp;', '').strip()
                     break
 
                 # Extention Date
                 Extention_Date = ""
-                for Extention_Date in browser.find_elements_by_xpath('/html/body/div/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[8]/td[2]'):
+                for Extention_Date in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[8]/td[2]'):
                     Extention_Date = Extention_Date.get_attribute('innerText').replace('&nbsp;', '').strip()
-                    if Extention_Date == "NO Extension":
+                    if Extention_Date == "لايوجد تمديد":
                         Extention_Date = ""
-                    else:pass
                     break
 
                 # Document
-                for Attachment in browser.find_elements_by_xpath('/html/body/div/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[9]/td[2]/a'):
+                for Attachment in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[9]/td[2]/a'):
                     Attachment = Attachment.get_attribute('href').strip()
                     SegFeild[5] = Attachment
                     break
 
                 # Close Date
                 try:
-                    for Close_Date in browser.find_elements_by_xpath('/html/body/div/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[7]/td[2]'):
-                        Close_Date = Close_Date.get_attribute('innerText').replace('&nbsp;', '').strip()
+                    for Close_Date in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[7]/td[2]'):
+                        Close_Date = Close_Date.get_attribute('innerText').strip()
                         datetime_object = datetime.strptime(Close_Date, "%Y-%m-%d")
                         mydate = datetime_object.strftime("%Y-%m-%d")
                         SegFeild[24] = mydate
                 except:
                     SegFeild[24] = ""
 
-                SegFeild[18] = "Subject: " + str(SegFeild[19]) + "<br>\n""Directorate_Name: " + str(SegFeild[12]) + "<br>\n""Release Date: " + str(Release_Date) + "<br>\n""Extention Date: " + str(Extention_Date) + "<br>\n""Close Date: " + str(SegFeild[24])
+                SegFeild[18] = "موضوع المناقصة: " + str(SegFeild[19]) + "<br>\n""اسم المديرية: " + str(SegFeild[12]) + "<br>\n""تاريخ الاصدار: " + str(Release_Date) + "<br>\n""تاريخ تمديد المناقصة: " + str(Extention_Date) + "<br>\n""تاريخ الاغلاق: " + str(SegFeild[24])
 
                 SegFeild[7] = "IQ"
 
@@ -277,20 +253,19 @@ def Scrap_data(browser, Tender_href):
                 # Source Name
                 SegFeild[31] = 'oil.gov.iq'
 
-                for Segdata in range(len(SegFeild)):
-                    print(Segdata, end=' ')
-                    print(SegFeild[Segdata])
-                    SegFeild = [SegFeild.replace("&quot;", "\"") for SegFeild in SegFeild]
-                    SegFeild = [SegFeild.replace("&QUOT;", "\"") for SegFeild in SegFeild]
-                    SegFeild = [SegFeild.replace("&nbsp;", " ") for SegFeild in SegFeild]
-                    SegFeild = [SegFeild.replace("&NBSP;", " ") for SegFeild in SegFeild]
-                    SegFeild = [SegFeild.replace("&amp;amp", "&") for SegFeild in SegFeild]
-                    SegFeild = [SegFeild.replace("&AMP;AMP", "&") for SegFeild in SegFeild]
-                    SegFeild = [SegFeild.replace("&amp;", "&") for SegFeild in SegFeild]
-                    SegFeild = [SegFeild.replace("&AMP;", "&") for SegFeild in SegFeild]
+                SegFeild[20] = ""
+                SegFeild[21] = "" 
+                SegFeild[42] = SegFeild[7]
+                SegFeild[43] = "" 
+
+                for SegIndex in range(len(SegFeild)):
+                    print(SegIndex, end=' ')
+                    print(SegFeild[SegIndex])
+                    SegFeild[SegIndex] = html.unescape(str(SegFeild[SegIndex]))
+                    SegFeild[SegIndex] = str(SegFeild[SegIndex]).replace("'", "''")
                 a = False
                 check_date(get_htmlSource, SegFeild)
-                print(" Total: " + str(Global_var.Total) + " Duplicate: " + str(
+                print(" Total: " + str(len(Tender_href)) + " Duplicate: " + str(
             Global_var.duplicate) + " Expired: " + str(Global_var.expired) + " Inserted: " + str(
             Global_var.inserted) + " Skipped: " + str(
             Global_var.skipped) + " Deadline Not given: " + str(
@@ -300,7 +275,7 @@ def Scrap_data(browser, Tender_href):
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print("Error ON : ", sys._getframe().f_code.co_name + "--> " + str(e), "\n", exc_type, "\n", fname, "\n", exc_tb.tb_lineno)
             a = True
-        ctypes.windll.user32.MessageBoxW(0, "Total: " + str(Global_var.Total) + "\n""Duplicate: " + str(
+        ctypes.windll.user32.MessageBoxW(0, "Total: " + str(len(Tender_href)) + "\n""Duplicate: " + str(
             Global_var.duplicate) + "\n""Expired: " + str(Global_var.expired) + "\n""Inserted: " + str(
             Global_var.inserted) + "\n""Skipped: " + str(
             Global_var.skipped) + "\n""Deadline Not given: " + str(
