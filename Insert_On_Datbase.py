@@ -254,6 +254,7 @@ def insert_L2L(SegFeild , Fileid):
             mycursor.execute(sql , val)
             mydb.commit()
             print("Code Reached On insert_L2L")
+            print("Live Tender")
             a5 = 1
         except Exception as e:
             Function_name :str = sys._getframe().f_code.co_name

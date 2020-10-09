@@ -16,7 +16,7 @@ import wx
 app = wx.App()
 def ChromeDriver():
 
-    browser = webdriver.Chrome(executable_path=str(f"F:\\chromedriver.exe"))
+    browser = webdriver.Chrome(executable_path=str(f"C:\\chromedriver.exe"))
     browser.maximize_window()
     browser.get("""https://chrome.google.com/webstore/detail/browsec-vpn-free-and-unli/omghfjlpggmjjaagoclmmobgdodcjboh?hl=en" ping="/url?sa=t&amp;source=web&amp;rct=j&amp;url=https://chrome.google.com/webstore/detail/browsec-vpn-free-and-unli/omghfjlpggmjjaagoclmmobgdodcjboh%3Fhl%3Den&amp;ved=2ahUKEwivq8rjlcHmAhVtxzgGHZ-JBMgQFjAAegQIAhAB""")
     for Add_Extension in browser.find_elements_by_xpath('/html/body/div[4]/div[2]/div/div/div[2]/div[2]/div'):
@@ -178,6 +178,14 @@ def Scrap_data(browser, Tender_href):
                         SegFeild[8] = "https://mrc.oil.gov.iq/"
                         SegFeild[12] = Name_of_Directorate.strip()
 
+                    elif '(OPDC)' in Name_of_Directorate:
+                        SegFeild[2] = "Masafi St, Baghdad, Iraq<br>\nPhone: +964 790 145 9594"
+                        SegFeild[8] = "http://www.opdc.oil.gov.iq/"
+                        SegFeild[12] = Name_of_Directorate.strip()
+
+                    elif '(OPC)' in Name_of_Directorate:
+                        SegFeild[2] = "Iraq"
+                        SegFeild[12] = Name_of_Directorate.strip()
                     elif '(GFC)' in Name_of_Directorate:
                         SegFeild[2] = "Taji, Iraq<br>\nPhone:"
                         SegFeild[8] = ""
