@@ -17,38 +17,61 @@ app = wx.App()
 def ChromeDriver():
 
     chrome_options = Options()
-    chrome_options.add_extension('C:\\BrowsecVPN.crx')
-    browser = webdriver.Chrome(executable_path=str(f"C:\\chromedriver.exe"),chrome_options=chrome_options)
+    chrome_options.add_extension('C:\\Translation EXE\\BrowsecVPN.crx')
+    browser = webdriver.Chrome(executable_path=str(f"C:\\Translation EXE\\chromedriver.exe"),chrome_options=chrome_options)
     browser.maximize_window()
     # browser.get("""https://chrome.google.com/webstore/detail/browsec-vpn-free-and-unli/omghfjlpggmjjaagoclmmobgdodcjboh?hl=en" ping="/url?sa=t&amp;source=web&amp;rct=j&amp;url=https://chrome.google.com/webstore/detail/browsec-vpn-free-and-unli/omghfjlpggmjjaagoclmmobgdodcjboh%3Fhl%3Den&amp;ved=2ahUKEwivq8rjlcHmAhVtxzgGHZ-JBMgQFjAAegQIAhAB""")
     wx.MessageBox(' -_-  Add Extension and Select Proxy Between 10 SEC -_- ', 'Info', wx.OK | wx.ICON_WARNING)
     time.sleep(15)  # WAIT UNTIL CHANGE THE MANUAL VPN SETtING
     browser.get("https://oil.gov.iq/index.php")
     wx.MessageBox(' -_-  Fill captch First -_- ', 'Info', wx.OK | wx.ICON_INFORMATION)
-    browser.get("https://oil.gov.iq/index.php?name=monaksa")
+    browser.get("https://oil.gov.iq/?tender")
     time.sleep(2)
-    for Search_button in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/table[3]/tbody/tr/td/table/tbody/tr/td/center[1]/input'):
-        Search_button.click()
-        break
-    time.sleep(2)
-    td = 2
+    
+    tr = 2
     tender_href_list = []
-    for release_date in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/table[3]/tbody/tr/td/table/tbody/tr/td/table[2]/tbody/tr/td[5]/center'):
-        release_date = release_date.get_attribute('innerText').strip()
-        datetime_object = datetime.strptime(release_date, '%Y-%m-%d')
-        publish_date = datetime_object.strftime("%Y-%m-%d")
-        datetime_object_pub = datetime.strptime(publish_date, '%Y-%m-%d')
-        User_Selected_date = datetime.strptime(str(Global_var.From_Date), '%Y-%m-%d')
-        timedelta_obj = datetime_object_pub - User_Selected_date
-        day = timedelta_obj.days
-        if day >= 0:
-            for tender_href in browser.find_elements_by_xpath(f'/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/table[3]/tbody/tr/td/table/tbody/tr/td/table[2]/tbody/tr[{str(td)}]/td[8]/div/a'):
-                tender_href = tender_href.get_attribute('href').strip()
-                tender_href_list.append(tender_href)
-                td += 1
+    
+    next_page = True
+    while next_page == True:
+        while True:
+            try:
+                release_date_list = browser.find_elements_by_xpath(f'//*[@id="resultTender"]/table/tbody/tr/td[4]')
+                del release_date_list[0]
                 break
-        else:
-            Scrap_data(browser, tender_href_list)
+            except:
+                wx.MessageBox(' -_-  release_date_list not fount -_- ', 'error', wx.OK | wx.ICON_ERROR)
+        tr = 2
+        for release_date in release_date_list:
+            release_date = release_date.get_attribute('innerText').strip()
+            datetime_object = datetime.strptime(release_date, '%Y-%m-%d')
+            publish_date = datetime_object.strftime("%Y-%m-%d")
+            datetime_object_pub = datetime.strptime(publish_date, '%Y-%m-%d')
+            User_Selected_date = datetime.strptime(str(Global_var.From_Date), '%Y-%m-%d')
+            timedelta_obj = datetime_object_pub - User_Selected_date
+            day = timedelta_obj.days
+            if day >= 0:
+                for tender_href in browser.find_elements_by_xpath(f'//*[@id="resultTender"]/table/tbody/tr[{str(tr)}]/td[6]/a'):
+                    tender_href = tender_href.get_attribute('href').strip()
+                    tender_href_list.append(tender_href)
+                    tr += 1
+                    break
+            else:
+                Scrap_data(browser, tender_href_list)
+                next_page = False
+                break
+        left_move = 1
+        while True:
+            try:
+                for next_Page_list in browser.find_elements_by_xpath(f'//*[@class="pagination_link_tender"]/div/i'):
+                    browser.execute_script("arguments[0].scrollIntoView();", next_Page_list)
+                    left_move += 1
+                    if left_move == 2:
+                        next_Page_list.click()
+                        time.sleep(2)
+                        break
+            except:
+                print('error on next page')
+                
 
 
 def Scrap_data(browser, Tender_href):
@@ -60,16 +83,16 @@ def Scrap_data(browser, Tender_href):
                 browser.get(href)
                 time.sleep(2)
                 SegFeild = []
-                for data in range(45):
+                for _ in range(45):
                     SegFeild.append('')
 
                 get_htmlSource = ""
-                for outerHTML in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table'):
+                for outerHTML in browser.find_elements_by_xpath('//*[@class="tenderDetails"]'):
                     get_htmlSource = outerHTML.get_attribute('outerHTML')
                     get_htmlSource = get_htmlSource.replace('href="upload/', 'href="https://oil.gov.iq/upload/')
                     break
                 # Purchaser
-                for Name_of_Directorate in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[2]/td[2]'):
+                for Name_of_Directorate in browser.find_elements_by_xpath('//*[@class="tenderDetails"]/tbody/tr[2]/td[2]/p'):
                     Name_of_Directorate = Name_of_Directorate.get_attribute('innerText').replace('&nbsp;', '').strip()
                     if '(OCC)' in Name_of_Directorate:
                         SegFeild[2] = "Baghdad, Iraq<br>\nTel: +964 781 275 0356"
@@ -194,47 +217,47 @@ def Scrap_data(browser, Tender_href):
                     break
 
                 # Title
-                for Tender_Subject in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[3]/td[2]'):
+                for Tender_Subject in browser.find_elements_by_xpath('//*[@class="tenderDetails"]/tbody/tr[1]/td[2]/p'):
                     Tender_Subject = Tender_Subject.get_attribute('innerText').replace('&nbsp;', '').strip()
                     Tender_Subject = string.capwords(str(Tender_Subject)).strip()
                     SegFeild[19] = Tender_Subject
                     break
 
-                # Email
-                for Email in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[4]/td[2]/div'):
-                    Email = Email.get_attribute('innerText').replace('&nbsp;', '').replace('&nbsp;', '').strip().replace(' ','')
-                    SegFeild[1] = Email.strip()
-                    break
+                # # Email
+                # for Email in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[4]/td[2]/div'):
+                #     Email = Email.get_attribute('innerText').replace('&nbsp;', '').replace('&nbsp;', '').strip().replace(' ','')
+                #     SegFeild[1] = Email.strip()
+                #     break
 
                 # tender NO
-                for Bid_number in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[5]/td[2]'):
+                for Bid_number in browser.find_elements_by_xpath('//*[@class="tenderDetails"]/tbody/tr[3]/td[2]'):
                     Bid_number = Bid_number.get_attribute('innerText').replace('&nbsp;', '').strip()
                     SegFeild[13] = Bid_number.strip()
                     break
 
                 # Release Date
                 Release_Date = ""
-                for Release_Date in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[6]/td[2]'):
+                for Release_Date in browser.find_elements_by_xpath('//*[@class="tenderDetails"]/tbody/tr[4]/td[2]'):
                     Release_Date = Release_Date.get_attribute('innerText').replace('&nbsp;', '').strip()
                     break
 
                 # Extention Date
-                Extention_Date = ""
-                for Extention_Date in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[8]/td[2]'):
-                    Extention_Date = Extention_Date.get_attribute('innerText').replace('&nbsp;', '').strip()
-                    if Extention_Date == "لايوجد تمديد":
-                        Extention_Date = ""
-                    break
+                # Extention_Date = ""
+                # for Extention_Date in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[8]/td[2]'):
+                #     Extention_Date = Extention_Date.get_attribute('innerText').replace('&nbsp;', '').strip()
+                #     if Extention_Date == "لايوجد تمديد":
+                #         Extention_Date = ""
+                #     break
 
                 # Document
-                for Attachment in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[9]/td[2]/a'):
-                    Attachment = Attachment.get_attribute('href').strip()
-                    SegFeild[5] = Attachment
-                    break
+                # for Attachment in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[9]/td[2]/a'):
+                #     Attachment = Attachment.get_attribute('href').strip()
+                #     SegFeild[5] = Attachment
+                #     break
 
                 # Close Date
                 try:
-                    for Close_Date in browser.find_elements_by_xpath('/html/body/div[2]/center/table/tbody/tr[7]/td/table/tbody/tr/td[2]/center/table/tbody/tr[7]/td[2]'):
+                    for Close_Date in browser.find_elements_by_xpath('//*[@class="tenderDetails"]/tbody/tr[5]/td[2]'):
                         Close_Date = Close_Date.get_attribute('innerText').strip()
                         datetime_object = datetime.strptime(Close_Date, "%Y-%m-%d")
                         mydate = datetime_object.strftime("%Y-%m-%d")
@@ -242,7 +265,7 @@ def Scrap_data(browser, Tender_href):
                 except:
                     SegFeild[24] = ""
 
-                SegFeild[18] = "موضوع المناقصة: " + str(SegFeild[19]) + "<br>\n""اسم المديرية: " + str(SegFeild[12]) + "<br>\n""تاريخ الاصدار: " + str(Release_Date) + "<br>\n""تاريخ تمديد المناقصة: " + str(Extention_Date) + "<br>\n""تاريخ الاغلاق: " + str(SegFeild[24])
+                SegFeild[18] = "موضوع المناقصة: " + str(SegFeild[19]) + "<br>\n""اسم المديرية: " + str(SegFeild[12]) + "<br>\n""تاريخ الاصدار: " + str(Release_Date) + "<br>\n""تاريخ الاغلاق: " + str(SegFeild[24])
 
                 SegFeild[7] = "IQ"
 
@@ -272,11 +295,7 @@ def Scrap_data(browser, Tender_href):
                     SegFeild[SegIndex] = str(SegFeild[SegIndex]).replace("'", "''")
                 a = False
                 check_date(get_htmlSource, SegFeild)
-                print(" Total: " + str(len(Tender_href)) + " Duplicate: " + str(
-            Global_var.duplicate) + " Expired: " + str(Global_var.expired) + " Inserted: " + str(
-            Global_var.inserted) + " Skipped: " + str(
-            Global_var.skipped) + " Deadline Not given: " + str(
-            Global_var.deadline_Not_given) + " QC Tenders: " + str(Global_var.QC_Tender),"\n")
+                print(" Total: " + str(len(Tender_href)) + " Duplicate: " + str(Global_var.duplicate) + " Expired: " + str(Global_var.expired) + " Inserted: " + str(Global_var.inserted) + " Skipped: " + str(Global_var.skipped) + " Deadline Not given: " + str(Global_var.deadline_Not_given) + " QC Tenders: " + str(Global_var.QC_Tender),"\n")
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
