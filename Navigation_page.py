@@ -59,18 +59,19 @@ def ChromeDriver():
                 Scrap_data(browser, tender_href_list)
                 next_page = False
                 break
-        left_move = 1
-        while True:
+        next1 = True
+        while next1 == True:
             try:
-                for next_Page_list in browser.find_elements_by_xpath(f'//*[@class="pagination_link_tender"]/div/i'):
+                for next_Page_list in browser.find_elements_by_xpath('/html/body/section/div/div/a[5]/div/i'):
                     browser.execute_script("arguments[0].scrollIntoView();", next_Page_list)
-                    left_move += 1
-                    if left_move == 2:
-                        next_Page_list.click()
-                        time.sleep(2)
-                        break
+                    next_Page_list.click()
+                    time.sleep(2)
+                    next1 = False
+                    break
             except:
                 print('error on next page')
+                next1 = True
+                time.sleep(2)
                 
 
 
